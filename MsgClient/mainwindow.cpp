@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(m_client, &Client::toServerConnected, this, [this](const QString& msg){
         m_serverName = msg;
-        QString text = "%1 [System] - Вы успешно подключились к серверу '%2'";
+        QString text = "<span>%1 [System] - Вы успешно подключились к серверу '%2'</span>";
         text = text.arg(QDateTime::currentDateTime().toString("dd.MM.yyyy hh.mm.ss"), msg);
         ui->textBrowserHistory->append(text);
     });
@@ -66,7 +66,7 @@ void MainWindow::startClient()
         ui->btnStart->setDisabled(true);
         ui->btnStop->setDisabled(false);
     } else {
-        QString err = "%1 [System] - Соединение с сервером не установелено";
+        QString err = "<span>%1 [System] - Соединение с сервером не установелено</span>";
         err = err.arg(QDateTime::currentDateTime().toString("dd.MM.yyyy hh.mm.ss"));
         emit error(err);
     }
@@ -120,7 +120,7 @@ void MainWindow::reciveMessage(const QString &data)
                     file.write(binData);
                     file.close();
 
-                    QString fileLink = "<a href='%1'>%2</a>";
+                    QString fileLink = "<a href=\"%1\">%2</a>";
                     fileLink = fileLink.arg(filePath, key);
                     ui->textBrowserHistory->append(fileLink);
                 }
