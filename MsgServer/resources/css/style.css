@@ -1,0 +1,106 @@
+
+QMainWindow {
+    background-color: "#fff";
+}
+
+/*
+* Стили для контролов
+*/
+
+QPushButton, QToolButton, QLineEdit, QProgressBar
+{
+border-color: "#888888";
+border-style: solid;
+border-width: 1px;
+border-radius: 4px;
+}
+
+QLineEdit {
+min-height: 28px;
+padding-left: 10px;
+padding-right: 10px;
+color: "#000";
+}
+
+QLineEdit:focus {
+border-color: "#009B76";
+}
+
+QPushButton {
+min-height: 28px;
+}
+
+QPushButton:hover {
+background-color: "#009B76";
+color: "#fff";
+}
+
+QPushButton:pressed {
+background-color: rgba(0, 155, 118, 0.5);
+color: "#fff";
+}
+
+QToolButton {
+min-height: 28px;
+min-width: 28px;
+}
+
+QToolButton:hover {
+background-color: "#009B76";
+color: "#fff";
+}
+
+QToolButton:pressed {
+background-color: rgba(0, 155, 118, 0.5);
+color: "#fff";
+}
+
+QTextBrowser:focus {
+border-color: "#009B76";
+}
+
+QTextEdit:focus {
+border-color: "#009B76";
+}
+
+/*
+* Стиль для QTabWidget
+*/
+
+QTabWidget {
+
+}
+
+QTabWidget::pane {
+/*    border-top: 1px solid #009B76;*/
+}
+
+QTabWidget::tab-bar {
+/*    left: 5px;*/
+}
+
+QTabBar::tab {
+    /*background: #009B76;
+    border: 2px solid #009B76;
+    border-bottom-color: #009B76;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    min-width: 8ex;
+    min-height: 15px;
+    padding: 2px;*/
+}
+
+QTabBar::tab:selected, QTabBar::tab:hover {
+/*    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #fafafa, stop: 0.4 #f4f4f4,
+                                stop: 0.5 #e7e7e7, stop: 1.0 #fafafa);*/
+}
+
+QTabBar::tab:selected {
+    /*border-color: #9B9B9B;
+    border-bottom-color: #C2C7CB;*/
+}
+
+QTabBar::tab:!selected {
+/*    margin-top: 2px;*/
+}
