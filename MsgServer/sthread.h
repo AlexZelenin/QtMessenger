@@ -26,6 +26,7 @@ public slots:
     void readyRead();
     void disconnected();
     void stop();
+    void errorConnection(const QAbstractSocket::SocketError&);
 
     void sendMessage(const QString& msg);
 
