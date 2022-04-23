@@ -28,6 +28,9 @@ private slots:
     void sendMessage();
     void addFile();
 
+    void connectedStateHandle();
+    void connectingRefuseHandle();
+
 signals:
     void error(const QString&);
     void sendedMessage(const QString&);

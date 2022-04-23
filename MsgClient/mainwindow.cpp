@@ -49,6 +49,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->tbtnLoadFile, &QToolButton::clicked, this, &MainWindow::addFile);
 
     connect(this, &MainWindow::sendedMessage, m_client, &Client::sendMessage);
+
+    connect(m_client, &Client::connectedState, this, &MainWindow::connectedStateHandle);
+    connect(m_client, &Client::connectionRefuse, this, &MainWindow::connectingRefuseHandle);
 }
 
 MainWindow::~MainWindow()
@@ -184,4 +187,16 @@ void MainWindow::addFile()
     }
     m_fileArray.append(fileJObject);
     m_sendObject.insert("files", m_fileArray);
+}
+
+void MainWindow::connectedStateHandle()
+{
+    ui->textEdit->setDisabled(false);
+    ui->btnSend->setDisabled(false);
+}
+
+void MainWindow::connectingRefuseHandle()
+{
+    ui->textEdit->setDisabled(true);
+    ui->btnSend->setDisabled(true);
 }

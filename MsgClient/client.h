@@ -19,15 +19,22 @@ public slots:
     void connected();
     void readyRead();
     void sendMessage(const QString& msg);
+    void errorConnection(QAbstractSocket::SocketError error);
+    void connectionState(QAbstractSocket::SocketState state);
 
 signals:
     void toServerConnected(const QString&);
     void disconnected();
     void reciveMessage(const QString&);
+    void connectedState();
+    void connectionRefuse();
 
 private:
     QTcpSocket* m_socket;
     QString m_clientName;
+
+    QString m_hostName;
+    quint16 m_port;
 
 };
 
