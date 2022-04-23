@@ -3,6 +3,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonParseError>
+#include <QDataStream>
 
 
 
@@ -10,14 +11,19 @@ SessionThread::SessionThread(int socketDescriptor, const QString& serverName, QO
     : QObject(parent)
     , m_socketDescriptor(socketDescriptor)
     , m_serverName(serverName)
+    , m_nextBlockSize(0)
 {
 }
 
 void SessionThread::runThread()
 {
     m_socket = new QTcpSocket;
+    m_socket->setSocketOption(QAbstractSocket::KeepAliveOption, true);
 
-    m_socket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+
+#if defined(Q_OS_WINDOWS)
+#elif defined(Q_OS_LINUX)
+#endif
 
     if (!m_socket->setSocketDescriptor(m_socketDescriptor)) {
         emit error(m_socket->error());
@@ -27,14 +33,35 @@ void SessionThread::runThread()
     connect(m_socket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
     connect(m_socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
     connect(m_socket, &QTcpSocket::errorOccurred, this, &SessionThread::errorConnection);
+    connect(m_socket, &QTcpSocket::stateChanged, this, &SessionThread::connectionState);
 }
 
 void SessionThread::readyRead()
 {
-    QByteArray data = m_socket->readAll();
+    QString data;
+    data.clear();
+
+    QDataStream in(m_socket);
+    in.setVersion(QDataStream::Qt_5_15);
+
+    while(true) {
+        if (!m_nextBlockSize) {
+            if (m_socket->bytesAvailable() < sizeof(quint16)) {
+                break;
+            }
+            in >> m_nextBlockSize;
+        }
+
+        if (m_socket->bytesAvailable() < m_nextBlockSize) {
+            break;
+        }
+
+        in >> data;
+        m_nextBlockSize = 0;
+    }
 
     QJsonParseError jsonError;
-    const QJsonDocument clientDoc = QJsonDocument::fromJson(data, &jsonError);
+    const QJsonDocument clientDoc = QJsonDocument::fromJson(data.toUtf8(), &jsonError);
 
     if (jsonError.error != QJsonParseError::NoError) {
         qDebug() << "Error incoming data:" << jsonError.errorString();
@@ -51,7 +78,7 @@ void SessionThread::readyRead()
         obj.insert("servername", QJsonValue::fromVariant(m_serverName));
 
         QJsonDocument doc(obj);
-        m_socket->write(doc.toJson());
+        sendMessage(doc.toJson());
         return;
     }
 
@@ -69,8 +96,9 @@ void SessionThread::stop()
     m_socket->close();
 }
 
-void SessionThread::errorConnection(const QAbstractSocket::SocketError & error)
+void SessionThread::errorConnection(QAbstractSocket::SocketError error)
 {
+    qDebug() << error;
     switch(error) {
     case QAbstractSocket::ConnectionRefusedError:
         qDebug() << "Connection refuse";
@@ -78,7 +106,26 @@ void SessionThread::errorConnection(const QAbstractSocket::SocketError & error)
     }
 }
 
+void SessionThread::connectionState(QAbstractSocket::SocketState state)
+{
+    switch(state) {
+    case QAbstractSocket::ConnectedState:
+        qDebug() << "Connected State";
+    case QAbstractSocket::UnconnectedState:
+        qDebug() << "Unconnected State";
+    case QAbstractSocket::ClosingState:
+        qDebug() << "Closing State";
+    }
+}
+
 void SessionThread::sendMessage(const QString &msg)
 {
-    m_socket->write(msg.toUtf8());
+    m_data.clear();
+    QDataStream out(&m_data, QIODevice::WriteOnly);
+
+    out.setVersion(QDataStream::Qt_5_15);
+    out << quint16(0) << msg;
+    out.device()->seek(0);
+    out << quint16(m_data.size() - sizeof(quint16));
+    m_socket->write(m_data);
 }

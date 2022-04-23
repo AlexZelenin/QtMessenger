@@ -26,7 +26,8 @@ public slots:
     void readyRead();
     void disconnected();
     void stop();
-    void errorConnection(const QAbstractSocket::SocketError&);
+    void errorConnection(QAbstractSocket::SocketError error);
+    void connectionState(QAbstractSocket::SocketState state);
 
     void sendMessage(const QString& msg);
 
@@ -35,6 +36,9 @@ private:
     QString m_serverName;
     QString m_clientName;
     QTcpSocket *m_socket;
+    quint16 m_nextBlockSize;
+
+    QByteArray m_data;
 };
 
 #endif // STHREAD_H

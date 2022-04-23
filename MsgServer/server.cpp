@@ -29,8 +29,8 @@ void Server::incomingConnection(qintptr handle)
 
     sth->moveToThread(thread);
 
-    connect(sth, &SessionThread::newClientConnected, this, &Server::newClientConnected, Qt::DirectConnection);
-    connect(sth, &SessionThread::clientDisconnected, this, &Server::clientDisconnected, Qt::DirectConnection);
+    connect(sth, &SessionThread::newClientConnected, this, &Server::newClientConnected, Qt::QueuedConnection);
+    connect(sth, &SessionThread::clientDisconnected, this, &Server::clientDisconnected, Qt::QueuedConnection);
 
     connect(thread, &QThread::started, sth, &SessionThread::runThread, Qt::DirectConnection);
     connect(this, &Server::stopSession, sth, &SessionThread::stop);

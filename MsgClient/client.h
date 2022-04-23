@@ -35,6 +35,9 @@ private:
 
     QString m_hostName;
     quint16 m_port;
+    quint16 m_nextBlockSize;
+
+    QByteArray m_data;
 
 };
 

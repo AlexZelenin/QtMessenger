@@ -4,6 +4,8 @@
 #include <QJsonObject>
 #include <QTimer>
 #include <QThread>
+#include <QDataStream>
+
 
 #if defined(Q_OS_LINUX)
 #include <sys/types.h>
@@ -15,6 +17,7 @@
 
 Client::Client(QObject *parent)
     : QObject{parent}
+    , m_nextBlockSize(0)
 {
 
 }
@@ -57,15 +60,35 @@ void Client::connected()
     auto data = doc.toJson();
     qDebug() << data;
 
-    m_socket->write(data);
+    sendMessage(data);
 }
 
 void Client::readyRead()
 {
-    QByteArray data = m_socket->readAll();
+    QString data;
+    data.clear();
+
+    QDataStream in(m_socket);
+    in.setVersion(QDataStream::Qt_5_15);
+
+    while(true) {
+        if (!m_nextBlockSize) {
+            if (m_socket->bytesAvailable() < sizeof(quint16)) {
+                break;
+            }
+            in >> m_nextBlockSize;
+        }
+
+        if (m_socket->bytesAvailable() < m_nextBlockSize) {
+            break;
+        }
+
+        in >> data;
+        m_nextBlockSize = 0;
+    }
 
     QJsonParseError jsonError;
-    QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
+    QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8(), &jsonError);
 
     if (jsonError.error != QJsonParseError::NoError) {
         qDebug() << "Data error:" << jsonError.errorString();
@@ -84,7 +107,13 @@ void Client::readyRead()
 
 void Client::sendMessage(const QString &msg)
 {
-    m_socket->write(msg.toUtf8());
+    m_data.clear();
+    QDataStream out(&m_data, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_15);
+    out << quint16(0) << msg;
+    out.device()->seek(0);
+    out << quint16(m_data.size() - sizeof(quint16));
+    m_socket->write(m_data);
 }
 
 void Client::errorConnection(QAbstractSocket::SocketError error)
