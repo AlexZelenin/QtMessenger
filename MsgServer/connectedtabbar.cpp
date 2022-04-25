@@ -37,6 +37,11 @@ ConnectedTabBar::~ConnectedTabBar()
     delete ui;
 }
 
+QString ConnectedTabBar::tabName() const
+{
+    return m_clientName;
+}
+
 void ConnectedTabBar::sendMessage()
 {
     const QString msg = ui->teMsgInput->toPlainText();
@@ -48,7 +53,7 @@ void ConnectedTabBar::sendMessage()
     auto data = doc.toJson();
 
 
-    QString text = "%1 [%2] - %3";
+    QString text = "<span>%1 [%2] - %3</span>";
     text = text.arg(QDateTime::currentDateTime().toString("dd.MM.yyyy hh.mm.ss"), m_serverName, msg);
     ui->textBrowserHistory->append(text);
 
@@ -88,7 +93,7 @@ void ConnectedTabBar::addFile()
     if (file.open(QIODevice::ReadOnly)) {
         QByteArray data;
         data = file.readAll();
-        fileJObject.insert(finfo.fileName(), QJsonValue::fromVariant(data));
+        fileJObject.insert(finfo.fileName(), QJsonValue::fromVariant(data.toHex()));
         file.close();
     }
     m_fileArray.append(fileJObject);
@@ -97,7 +102,6 @@ void ConnectedTabBar::addFile()
 
 void ConnectedTabBar::reciveMessage(const QString &msg)
 {
-    qDebug() << "ReciveMessage" << msg;
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &jsonError);
     if (jsonError.error != QJsonParseError::NoError) {
@@ -108,7 +112,7 @@ void ConnectedTabBar::reciveMessage(const QString &msg)
 
     if (object.contains("message")) {
         const QString msg = object.value("message").toString();
-        QString text = "%1 [%2] - %3";
+        QString text = "<span>%1 [%2] - %3</span>";
         text = text.arg(QDateTime::currentDateTime().toString("dd.MM.yyyy hh.mm.ss"), m_clientName, msg);
         ui->textBrowserHistory->append(text);
         emit logMessages(text);
@@ -133,7 +137,7 @@ void ConnectedTabBar::reciveMessage(const QString &msg)
                         return;
                     }
 
-                    QByteArray binData = value.toObject().value(key).toString().toUtf8();
+                    QByteArray binData = QByteArray::fromHex(value.toObject().value(key).toString().toUtf8());
                     file.write(binData);
                     file.close();
 

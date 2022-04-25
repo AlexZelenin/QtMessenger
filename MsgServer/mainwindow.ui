@@ -148,7 +148,11 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
-           <widget class="QTabWidget" name="tabWidget"/>
+           <widget class="QTabWidget" name="tabWidget">
+            <property name="tabsClosable">
+             <bool>false</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

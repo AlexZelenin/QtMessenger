@@ -21,7 +21,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
+public slots:
     void startClient();
     void stopClient();
     void reciveMessage(const QString& data);
@@ -30,6 +30,8 @@ private slots:
 
     void connectedStateHandle();
     void connectingRefuseHandle();
+
+    void errorHandle(const QString& error);
 
 signals:
     void error(const QString&);

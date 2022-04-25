@@ -2,8 +2,9 @@
 #define SERVER_H
 
 #include <QTcpServer>
+#include <QThread>
 
-class SessionThread;
+#include "sthread.h"
 
 class Server : public QTcpServer
 {

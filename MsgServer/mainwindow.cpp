@@ -29,6 +29,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnStop, &QPushButton::clicked, this, &MainWindow::stopServer);
     connect(m_server, &Server::newClientConnected, this, &MainWindow::newConnection);
     connect(m_server, &Server::clientDisconnected, this, &MainWindow::disconnection);
+
+    connect(ui->lePort, &QLineEdit::textChanged, this, [this](){
+        if (ui->lePort->text().toInt() > 65535)
+            ui->lePort->setText(QString::number(65535));
+    });
 }
 
 MainWindow::~MainWindow()
@@ -36,11 +41,22 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+/*
+ * Метод запуска сервера
+*/
 void MainWindow::startServer()
 {
+    /*
+     * Получаем введенные данные конфигурации
+     * Порт и имя сервера
+    */
     int port = ui->lePort->text().toInt();
     m_serverName = ui->leServerName->text();
 
+    /*
+     * Проверяем если поля не заполнены, то выходим из метода и сообщаем пользователю
+     * о том что поля не заполнены
+    */
     if (m_serverName.isEmpty() || !port) {
         ui->statusbar->showMessage("Поля конфигурации не заполенены. Сервер не запущен.");
         return;
@@ -48,6 +64,9 @@ void MainWindow::startServer()
 
     ui->statusbar->clearMessage();
 
+    /*
+     * Запускаем сервер. Если сервер запустился, переключаем статус в активный.
+    */
     if (m_server->start(port, m_serverName)) {
         ui->lblStatus->setText(tr(active_text));
         ui->btnStart->setDisabled(true);
@@ -67,27 +86,62 @@ void MainWindow::stopServer()
     ui->lblCountClients->clear();
 }
 
+/*
+ * Новое подключение. Функция принимает имя поключившегося клиента и его поток сессии
+*/
 void MainWindow::newConnection(const QString& clientName, SessionThread* thread)
 {
+    /*
+     * Увеличиваем счетчик поключений на 1
+     * и информируем в разделе статус.
+    */
     m_countClients++;
     ui->lblCountClients->setText(QString::number(m_countClients));
+
+    /*
+     * Создаем новую вкладку для нового подключения
+    */
     ConnectedTabBar *tabBar = new ConnectedTabBar(m_serverName, clientName, ui->tabWidget);
 
+    /**/
     connect(tabBar, &ConnectedTabBar::sendedMessage, thread,
             &SessionThread::sendMessage, Qt::QueuedConnection);
-    connect(thread, &SessionThread::recivedMessage, tabBar,
+    connect(thread, &SessionThread::recive, tabBar,
             &ConnectedTabBar::reciveMessage, Qt::QueuedConnection);
 
-    int index = ui->tabWidget->addTab(tabBar, clientName);
-    m_tabs.insert(clientName, index);
+    /*
+     * Получаем ID виджета для дальнейшего обращения именно к этой вкладке
+     * и добавляем его в QHash где ключ это имя клиента, значение WId
+    */
+    WId wid = tabBar->winId();
+    m_tabs.insert(clientName, wid);
+
+    ui->tabWidget->addTab(tabBar, clientName);
 }
 
+/*
+ * Мотод отключения клиента от сервера
+*/
 void MainWindow::disconnection(const QString& clientName)
 {
-    m_countClients ? m_countClients-- : m_countClients = 0;
+    /*
+     *Уменьшаем счетчик на 1. Перед этим проверяем что бы он был больше 0
+    */
+    if (m_countClients)
+        m_countClients--;
 
     ui->lblCountClients->setText(QString::number(m_countClients));
-    int index = m_tabs.value(clientName);
-    ui->tabWidget->removeTab(index);
-}
 
+    /*
+     * Получаем WId по имени клиента
+     * и удаляем его из QHash
+    */
+    WId wid = m_tabs.value(clientName);
+    m_tabs.remove(clientName);
+
+    /*
+     * Находим нужный виджет вкладки и помечаем его на удаление
+    */
+    QWidget* widget = ui->tabWidget->find(wid);
+    widget->deleteLater();
+}

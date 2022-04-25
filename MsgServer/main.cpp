@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
 
     if (style.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qApp->setStyleSheet(style.readAll());
+        style.close();
     } else {
         qDebug() << style.errorString();
     }

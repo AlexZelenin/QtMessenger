@@ -28,6 +28,11 @@ signals:
     void reciveMessage(const QString&);
     void connectedState();
     void connectionRefuse();
+    void closingState();
+
+    void networkError(const QString&);
+    void hostNotFound(const QString&);
+    void socketTimeOut(const QString&);
 
 private:
     QTcpSocket* m_socket;

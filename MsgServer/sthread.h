@@ -3,23 +3,22 @@
 
 #include <QThread>
 #include <QTcpSocket>
+#include <QTimer>
 
 class SessionThread : public QObject
 {
     Q_OBJECT
+
 public:
     SessionThread(int socketDescriptor, const QString& serverName, QObject* parent = Q_NULLPTR);
-
-    // QThread interface
-protected:
-    //void run() override;
-
+    ~SessionThread();
 
 signals:
     void error(QTcpSocket::SocketError socketError);
     void newClientConnected(const QString&, SessionThread*);
     void clientDisconnected(const QString&);
-    void recivedMessage(const QString&);
+    void recive(const QString&);
+    void send(const QString&);
 
 public slots:
     void runThread();
@@ -39,6 +38,8 @@ private:
     quint16 m_nextBlockSize;
 
     QByteArray m_data;
+
+    QTimer *m_timer;
 };
 
 #endif // STHREAD_H

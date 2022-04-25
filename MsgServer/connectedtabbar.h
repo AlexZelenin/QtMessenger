@@ -20,6 +20,8 @@ public:
     explicit ConnectedTabBar(const QString& serverName, const QString& clientName, QWidget *parent = nullptr);
     ~ConnectedTabBar();
 
+    QString tabName() const;
+
 signals:
     void sendedMessage(const QString&);
     void logMessages(const QString&);

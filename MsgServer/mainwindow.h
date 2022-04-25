@@ -20,6 +20,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+
+signals:
+    void closeSession(QThread*);
+
 public slots:
     void startServer();
     void stopServer();
@@ -31,7 +35,12 @@ private:
 
     Server *m_server;
     unsigned int m_countClients;
-    QHash<QString, int> m_tabs;
+
+    /*
+     * QHash нужен для быстрого поиска значения по ключу
+    */
+    QHash<QString, WId> m_tabs;
     QString m_serverName;
+
 };
 #endif // MAINWINDOW_H
