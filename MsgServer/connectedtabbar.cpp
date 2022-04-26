@@ -21,11 +21,15 @@ ConnectedTabBar::ConnectedTabBar(const QString& serverName, const QString& clien
     connect(ui->tbtnLoadFile, &QToolButton::clicked, this, &ConnectedTabBar::addFile);
 
     connect(this, &ConnectedTabBar::logMessages, this, [this](const QString& msg) {
+        QString text = msg;
+        text = text.remove("<span>");
+        text = text.remove("</span>");
+
         QString fileName = m_clientName;
         fileName.append(".txt");
         QFile fileLog(fileName);
         if (fileLog.open(QIODevice::WriteOnly | QIODevice::Append)) {
-            fileLog.write(msg.toUtf8());
+            fileLog.write(text.toUtf8());
             fileLog.write("\n");
             fileLog.close();
         }
