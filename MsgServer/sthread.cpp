@@ -5,7 +5,7 @@
 #include <QJsonParseError>
 #include <QDataStream>
 
-
+#include "serialize.pb.h"
 
 SessionThread::SessionThread(int socketDescriptor, const QString& serverName, QObject* parent)
     : QObject(parent)

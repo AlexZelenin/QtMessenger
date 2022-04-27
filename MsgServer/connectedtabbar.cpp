@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QDateTime>
 
+#include "serialize.pb.h"
 
 ConnectedTabBar::ConnectedTabBar(const QString& serverName, const QString& clientName, QWidget *parent) :
     QTabBar(parent),

@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QDir>
 
+#include "serialize.pb.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)

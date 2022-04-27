@@ -6,6 +6,7 @@
 #include <QThread>
 #include <QDataStream>
 
+#include "serialize.pb.h"
 
 #if defined(Q_OS_LINUX)
 #include <sys/types.h>
@@ -73,12 +74,21 @@ void Client::connected()
      * в котором передаем имя клиента
      * и отправляем на сервер
     */
-    QJsonObject jobj;
-    jobj.insert("clientname", QJsonValue::fromVariant(m_clientName));
-    QJsonDocument doc(jobj);
+//    QJsonObject jobj;
+//    jobj.insert("clientname", QJsonValue::fromVariant(m_clientName));
+//    QJsonDocument doc(jobj);
 
-    auto data = doc.toJson();
-    qDebug() << data;
+//    auto data = doc.toJson();
+//    qDebug() << data;
+
+    Serialize::Msg msg;
+    msg.set_messagetype(Serialize::Msg_TypeMessage::Msg_TypeMessage_Handshake);
+    msg.set_sendername(m_clientName.toStdString());
+    Serialize::Handshake handshake;
+    handshake.set_name(m_clientName.toStdString());
+    *msg.mutable_handshake() = handshake;
+
+    const QByteArray data = msg.SerializeAsString().c_str();
 
     sendMessage(data);
 }

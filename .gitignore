@@ -60,3 +60,6 @@ build
 build/
 build/*
 build*
+
+third-party/*!cmake
+third-party/protobuf/*
