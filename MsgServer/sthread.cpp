@@ -97,6 +97,8 @@ void SessionThread::readyRead()
         m_nextBlockSize = 0;
     }
 
+    Serialize::Msg msg;
+
     /*
      * Переводим данные в тип Json
     */
