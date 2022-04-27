@@ -100,28 +100,30 @@ void SessionThread::readyRead()
     Serialize::Msg msg;
     msg.ParseFromString(data.toStdString());
 
-    /*
-     * Переводим данные в тип Json
-    */
-    QJsonParseError jsonError;
-    const QJsonDocument clientDoc = QJsonDocument::fromJson(data.toUtf8(), &jsonError);
+//    /*
+//     * Переводим данные в тип Json
+//    */
+//    QJsonParseError jsonError;
+//    const QJsonDocument clientDoc = QJsonDocument::fromJson(data.toUtf8(), &jsonError);
 
-    /*
-     * Проверка на валидность структуры Json
-    */
-    if (jsonError.error != QJsonParseError::NoError) {
-        qDebug() << "Error incoming data:" << jsonError.errorString();
-        return;
-    }
+//    /*
+//     * Проверка на валидность структуры Json
+//    */
+//    if (jsonError.error != QJsonParseError::NoError) {
+//        qDebug() << "Error incoming data:" << jsonError.errorString();
+//        return;
+//    }
 
-    const QJsonObject clientObj = clientDoc.object();
+//    const QJsonObject clientObj = clientDoc.object();
 
     /*
      * Проверяем, если есть ключ 'clientname', то передаем сигнал с именем поключенного клиента
      * и его поток. Далее формируем Json с именем сервера и отправляем в ответ клиенту. Говоря тем самым о успешном поключении клиента
     */
-    if (clientObj.contains("clientname")) {
-        m_clientName = clientObj.value("clientname").toString();
+
+    if (msg.messagetype() == Serialize::Msg_TypeMessage::Msg_TypeMessage_Handshake) {
+        m_clientName = msg.handshake().name().c_str();
+        qDebug() << "From Serialize data" << m_clientName;
         emit newClientConnected(m_clientName, this);
 
         QJsonObject obj;
