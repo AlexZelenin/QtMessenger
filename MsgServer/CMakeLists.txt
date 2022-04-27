@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
+
 project(MsgServer VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -11,8 +12,20 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+file(GLOB PROTOBUF_DEFINITION_FILES "proto/*.proto")
+
+set(PROTOBUF_INPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/proto")
+set(PROTOBUF_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}")
+
+include(FindProtobuf)
+
+find_package(protobuf REQUIRED)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets Network REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Network REQUIRED)
+
+
+file(GLOB PROTOBUF_MODELS_INCLUDES "*.pb.cc" "*pb.h")
+include_directories(${Protobuf_INCLUDE_DIR})
 
 qt_add_resources(QT_RESOURCES resources.qrc)
 
@@ -28,6 +41,7 @@ set(PROJECT_SOURCES
         server.cpp
         sthread.h
         sthread.cpp
+        ${PROTOBUF_DEFINITION_FILES}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -59,6 +73,7 @@ endif()
 target_link_libraries(MsgServer PRIVATE
                         Qt${QT_VERSION_MAJOR}::Widgets
                         Qt${QT_VERSION_MAJOR}::Network
+                        ${PROTOBUF_LIBRARY}
                      )
 
 set_target_properties(MsgServer PROPERTIES

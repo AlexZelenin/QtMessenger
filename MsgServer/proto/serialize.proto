@@ -1,0 +1,36 @@
+syntax "proto3";
+
+package Serialize;
+
+message Msg {
+    string senderName = 1;
+
+    enum TypeMessage {
+        Handshake = 0;
+        Message = 1;
+        File = 2;
+        StateNet = 3;
+    }
+
+    optional TypeMessage messageType = 2 [default = Message];
+    optional repeated Files files = 3;
+    optional Handshake handshake = 4;
+}
+
+message Files {
+
+    enum TypeHash {
+        Md5 = 0,
+        SHA_1 = 1,
+        SHA_256 = 2
+    }
+
+    required string fileName = 1;
+    required string fileContent = 2;
+    required string hash = 3 [default = SHA_1];
+}
+
+message Handshake {
+    required string name = 1;
+}
+
