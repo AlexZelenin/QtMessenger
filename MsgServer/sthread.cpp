@@ -98,6 +98,7 @@ void SessionThread::readyRead()
     }
 
     Serialize::Msg msg;
+    msg.ParseFromString(data.toStdString());
 
     /*
      * Переводим данные в тип Json
